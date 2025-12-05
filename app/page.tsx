@@ -426,7 +426,7 @@ export default function Home() {
                         <div className="flex-1">
                           <h4 className="font-semibold mb-2">Clone the repository</h4>
                           <Terminal sequence={false} className="max-w-full">
-                            <AnimatedSpan startOnView={false}><span className="text-green-400">$ </span>git clone https://github.com/yourusername/next-appwrite-starter.git</AnimatedSpan>
+                            <AnimatedSpan startOnView={false}><span className="text-green-400">$ </span>git clone https://github.com/Alaric-senpai/nextjs-appwrite-starter.git</AnimatedSpan>
                             <AnimatedSpan startOnView={false}><span className="text-green-400">$ </span>cd next-appwrite-starter</AnimatedSpan>
                           </Terminal>
                         </div>
