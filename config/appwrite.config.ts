@@ -4,12 +4,12 @@
  */
 export const appwritecfg = {
     project: {
-        id: "",
-        name: "",
-        endpoint: "",
-        apikey: ""
+        id: process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!,
+        endpoint: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!,
+        apikey: process.env.APPWRITE_API_KEY!
     },
+    databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
     tables: {
-        users: ""
+        users: process.env.NEXT_PUBLIC_APPWRITE_USERS_TABLE_ID!
     }
 }

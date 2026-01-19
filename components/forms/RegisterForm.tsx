@@ -1,7 +1,7 @@
 "use client"
 import * as z from "zod"
 import { RegisterformSchema } from '@/lib/form-schema'
-import { RegisterserverAction } from '@/actions/server-action'
+import { RegisterserverAction } from '@/actions/auth.actions'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import { useAction } from "next-safe-action/hooks"
@@ -14,11 +14,14 @@ import { Password } from "@/components/ui/password"
 import { Checkbox } from "@/components/ui/checkbox"
 import { SocialLogin } from "./SocialLogin"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 type Schema = z.infer<typeof RegisterformSchema>;
 
 export function SignupForm() {
 
+const router = useRouter();
 const form = useForm<Schema>({
   resolver: zodResolver(RegisterformSchema as any),
   defaultValues: {
@@ -31,8 +34,11 @@ const form = useForm<Schema>({
 })
 const formAction = useAction(RegisterserverAction, {
   onSuccess: (data) => {
-    // TODO: show success message
     form.reset();
+    // Redirect to login after 2 seconds
+    setTimeout(() => {
+      router.push('/login?registered=true');
+    }, 2000);
   },
   onError: () => {
   // TODO: show error message
@@ -71,7 +77,7 @@ const { isExecuting, hasSucceeded, result } = formAction;
             Your account has been successfully created
           </p>
             <p className="text-center text-base text-primary mt-3">
-              Redirecting to dashboard
+              Redirecting to login page...
           </p>
         </motion.div>
       </div>)
@@ -197,7 +203,7 @@ return (
 
           <p className="text-center text-sm text-muted-foreground mt-4">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary hover:underline font-medium">
+            <Link href="/login" className="text-primary hover:underline font-medium">
               Sign in
             </Link>
           </p>
