@@ -3,11 +3,9 @@
 
 
 
+import { ROLE_COOKIE, SESSION_COOKIE, UserRole } from "@/lib/utils";
 import { cookies } from "next/headers";
-import { boolean } from "zod";
 
-export const ROLE_COOKIE = "user_role";
-export const SESSION_COOKIE = 'user_session';
 
 /**
  * 
@@ -105,7 +103,7 @@ export const getUserSessionCookie = async()=>{
  * 
  * @param value 
  */
-export const setRoleCookie = async(value:'admin'| 'client')=>{
+export const setRoleCookie = async(value:UserRole)=>{
     await setCookie(ROLE_COOKIE, value)
 }
 
@@ -120,5 +118,5 @@ export const deleteRoleCookie = async()=>{
  * get the saved user role
  */
 export const getRoleCookie = async()=>{
-    await getCookie(ROLE_COOKIE)
+   return await getCookie(ROLE_COOKIE)
 }

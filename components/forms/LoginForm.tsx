@@ -1,7 +1,7 @@
 "use client"
 import * as z from "zod"
 import {  LoginformSchema } from '@/lib/form-schema'
-import { LoginserverAction } from '@/actions/server-action'
+import { LoginserverAction } from '@/actions/auth.actions'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import { useAction } from "next-safe-action/hooks"
@@ -13,11 +13,14 @@ import { Input } from "@/components/ui/input"
 import { Password } from "@/components/ui/password"
 import { SocialLogin } from "./SocialLogin"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 type Schema = z.infer<typeof LoginformSchema>;
 
 export function LoginForm() {
 
+const router = useRouter();
 const form = useForm<Schema>({
   resolver: zodResolver(LoginformSchema as any),
   defaultValues: {
@@ -26,9 +29,17 @@ const form = useForm<Schema>({
   }
 })
 const formAction = useAction(LoginserverAction, {
-  onSuccess: () => {
-    // TODO: show success message
+  onSuccess: (data) => {
     form.reset();
+    // Redirect to respective dashboard based on role
+    const role = data?.data?.role;
+    setTimeout(() => {
+      if (role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
+    }, 1500);
   },
   onError: () => {
   // TODO: show error message
@@ -65,6 +76,9 @@ const { isExecuting, hasSucceeded } = formAction;
           </h2>
           <p className="text-center text-base text-muted-foreground">
             You've successfully logged in to your account
+          </p>
+          <p className="text-center text-base text-primary mt-3">
+            Redirecting to dashboard...
           </p>
         </motion.div>
       </div>)
@@ -126,7 +140,7 @@ return (
 
           <p className="text-center text-sm text-muted-foreground mt-4">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+            <Link href="/signup" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
           </p>
