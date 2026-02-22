@@ -19,42 +19,48 @@ import { AlertCircle } from 'lucide-react';
 type LoginFormValues = z.infer<typeof LoginformSchema>;
 
 export function LoginForm() {
-  const router = useRouter();
-  const [globalError, setGlobalError] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(LoginformSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const { execute, isExecuting } = useAction(LoginserverAction, {
-    onSuccess: ({ data }) => {
-      if (data?.success && data.data) {
-        reset();
-        const role = data.data.role;
-        // Redirect logic based on role
+const [globalError, setGlobalError] = useState<string | null>(null);
+const router = useRouter();
+const form = useForm<Schema>({
+  resolver: zodResolver(LoginformSchema),
+  defaultValues: {
+    email: "",
+    password: ""
+  }
+})
+const formAction = useAction(LoginserverAction, {
+  onSuccess: ({ data }) => {
+    if (data?.success) {
+      form.reset();
+      // Redirect to respective dashboard based on role
+      const role = data.data?.role;
+      setTimeout(() => {
         if (role === 'admin') {
           router.push('/admin');
         } else {
           router.push('/dashboard');
         }
-      }
-    },
-    onError: ({ error }) => {
-      if (error?.serverError) {
-        setGlobalError(error.serverError);
-      } else {
-        setGlobalError("An unexpected error occurred.");
-      }
-    },
+      }, 1500);
+    } else {
+      form.setError("root", {
+        message: data?.message || "Login failed"
+      });
+    }
+  },
+  onError: ({ error }) => {
+    form.setError("root", {
+      message: error.serverError || "An unexpected error occurred"
+    });
+    if (error?.serverError) {
+      setGlobalError(error.serverError);
+    } else {
+      setGlobalError("An unexpected error occurred. Please try again.");
+    }
+  },
+});
+const handleSubmit = form.handleSubmit(async (data: Schema) => {
+    setGlobalError(null);
+    formAction.execute(data);
   });
 
   const onSubmit = (data: LoginFormValues) => {
@@ -71,23 +77,30 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Email
-          </label>
-          <Input
-            id="email"
-            placeholder="m@example.com"
-            type="email"
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect="off"
-            disabled={isExecuting || isSubmitting}
-            {...register('email')}
-          />
-          {errors.email && (
-            <p className="text-sm text-destructive font-medium">{errors.email.message}</p>
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} className="text-center" />
+          )}
+
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="gap-2">
+            <FieldLabel htmlFor="email" className="text-sm font-medium">Email</FieldLabel>
+              <Input
+                {...field}
+                id="email"
+                type="text"
+                onChange={(e) => {
+                field.onChange(e.target.value)
+                }}
+                aria-invalid={fieldState.invalid}
+                placeholder="you@example.com"
+                className="h-11"
+              />
+              
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         </div>
 

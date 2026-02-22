@@ -3,6 +3,7 @@
 
 
 
+import { SESSION_CONFIG } from "@/config/helpers/config";
 import { ROLE_COOKIE, SESSION_COOKIE, UserRole } from "@/lib/utils";
 import { cookies } from "next/headers";
 
@@ -20,7 +21,7 @@ export const setCookie = async(name:string, value:any ,config?:Record<string, an
     const cookiestore = await cookies()
     cookiestore.set(name, value, {
         ...config,
-        maxAge: 60 * 60 * 30 *1000,
+        maxAge: SESSION_CONFIG.MAX_AGE,
         secure: process.env.NODE_ENV === 'development' ? false : true,
         httpOnly: true
     })
