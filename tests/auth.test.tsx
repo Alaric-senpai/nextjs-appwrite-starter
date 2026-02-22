@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { LoginForm } from '@/components/forms/LoginForm';
-import { SignupForm } from '@/components/forms/RegisterForm';
+import { RegisterForm } from '@/components/forms/RegisterForm';
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock server actions
@@ -19,7 +19,7 @@ describe('Auth Forms', () => {
   });
 
   it('renders signup form correctly', () => {
-    render(<SignupForm />);
+    render(<RegisterForm />);
     expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();

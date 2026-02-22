@@ -40,7 +40,6 @@ const allProviders = [
 ]
 
 interface SocialLoginProps {
-  mode?: "login" | "signup"
   showAllProviders?: boolean
 }
 
@@ -48,8 +47,8 @@ export function SocialLogin({ showAllProviders = false }: SocialLoginProps) {
   const [error, setError] = useState<string | null>(null);
   const { execute, isExecuting } = useAction(OAuthServerAction, {
     onSuccess: ({ data }) => {
-      if (data?.redirectUrl) {
-         window.location.href = data.redirectUrl;
+      if (data?.data?.redirectUrl) {
+         window.location.href = data.data.redirectUrl;
       }
     },
     onError: ({ error }) => {
@@ -69,7 +68,7 @@ export function SocialLogin({ showAllProviders = false }: SocialLoginProps) {
   const buttons = showAllProviders ? allProviders : socialMediaButtons
 
   return (
-    <>
+    <div className="w-full">
       <FieldSeparator className="my-6">OR</FieldSeparator>
 
       {error && (
@@ -99,6 +98,6 @@ export function SocialLogin({ showAllProviders = false }: SocialLoginProps) {
           </Button>
         ))}
       </div>
-    </>
+    </div>
   )
 }
