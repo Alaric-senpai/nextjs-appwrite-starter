@@ -15,15 +15,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { SocialLogin } from "./SocialLogin"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useState } from "react"
+import { AlertCircle } from "lucide-react"
 
 type Schema = z.infer<typeof RegisterformSchema>;
 
 export function SignupForm() {
-
+const [globalError, setGlobalError] = useState<string | null>(null);
 const router = useRouter();
 const form = useForm<Schema>({
-  resolver: zodResolver(RegisterformSchema as any),
+  resolver: zodResolver(RegisterformSchema),
   defaultValues: {
     name: "",
     email: "",
@@ -33,22 +34,27 @@ const form = useForm<Schema>({
   }
 })
 const formAction = useAction(RegisterserverAction, {
-  onSuccess: (data) => {
+  onSuccess: () => {
     form.reset();
     // Redirect to login after 2 seconds
     setTimeout(() => {
       router.push('/login?registered=true');
     }, 2000);
   },
-  onError: () => {
-  // TODO: show error message
+  onError: ({ error }) => {
+    if (error?.serverError) {
+      setGlobalError(error.serverError);
+    } else {
+      setGlobalError("An unexpected error occurred. Please try again.");
+    }
   },
 });
 const handleSubmit = form.handleSubmit(async (data: Schema) => {
+    setGlobalError(null);
     formAction.execute(data);
   });
 
-const { isExecuting, hasSucceeded, result } = formAction;
+const { isExecuting, hasSucceeded } = formAction;
   if (hasSucceeded) {
     return (<div className="p-8 w-full max-w-md rounded-2xl border bg-card/50 backdrop-blur-sm shadow-xl dark:shadow-primary/5">
         <motion.div
@@ -193,6 +199,13 @@ return (
             </Field>
           )}
         />
+
+        {globalError && (
+          <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <p>{globalError}</p>
+          </div>
+        )}
 
 <SocialLogin mode="signup" />
           </FieldGroup>

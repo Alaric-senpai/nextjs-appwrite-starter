@@ -11,5 +11,6 @@ export const appwritecfg = {
     databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
     tables: {
         users: process.env.NEXT_PUBLIC_APPWRITE_USERS_TABLE_ID!
-    }
+    },
+    bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!
 }

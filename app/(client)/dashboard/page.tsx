@@ -1,9 +1,27 @@
 import { getCurrentUser } from '@/actions/auth.actions';
+import { createClientSession } from '@/server/clients';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LayoutDashboard, Shield, Link2, Activity } from 'lucide-react';
+import Link from 'next/link';
+
+async function getClientStats() {
+  try {
+    const { accounts } = await createClientSession();
+    const identities = await accounts.listIdentities();
+    return {
+      linkedAccounts: identities.total,
+    };
+  } catch (error) {
+    console.error("Failed to fetch client stats:", error);
+    return {
+      linkedAccounts: 0,
+    };
+  }
+}
 
 export default async function ClientDashboard() {
   const { user } = await getCurrentUser();
+  const stats = await getClientStats();
 
   return (
     <div className="space-y-6">
@@ -11,7 +29,7 @@ export default async function ClientDashboard() {
       <div>
         <h1 className="text-3xl font-bold">Welcome back, {user?.name}!</h1>
         <p className="text-muted-foreground mt-2">
-          Here's an overview of your account
+          Here&apos;s an overview of your account
         </p>
       </div>
 
@@ -49,9 +67,9 @@ export default async function ClientDashboard() {
             <Link2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Available</div>
+            <div className="text-2xl font-bold">{stats.linkedAccounts}</div>
             <p className="text-xs text-muted-foreground">
-              Connect multiple providers
+              Connected providers
             </p>
           </CardContent>
         </Card>
@@ -79,20 +97,20 @@ export default async function ClientDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          <div className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
+          <Link href="/dashboard/account-security" className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
             <Shield className="h-8 w-8 mb-2 text-primary" />
             <h3 className="font-semibold mb-1">Account Security</h3>
             <p className="text-sm text-muted-foreground">
               Manage your linked accounts and active sessions
             </p>
-          </div>
-          <div className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
+          </Link>
+          <Link href="/dashboard/link-account" className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
             <Link2 className="h-8 w-8 mb-2 text-primary" />
             <h3 className="font-semibold mb-1">Link Account</h3>
             <p className="text-sm text-muted-foreground">
               Connect additional OAuth providers to your account
             </p>
-          </div>
+          </Link>
         </CardContent>
       </Card>
 
