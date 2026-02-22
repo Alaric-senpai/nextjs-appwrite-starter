@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { FieldSeparator } from "@/components/ui/field"
 import { OAuthServerAction } from "@/actions/auth.actions"
 import { useAction } from "next-safe-action/hooks"
+import { useState } from "react"
+import { AlertCircle } from "lucide-react"
 
 const socialMediaButtons = [
   {
@@ -38,23 +40,29 @@ const allProviders = [
 ]
 
 interface SocialLoginProps {
-  mode: "login" | "signup"
+  mode?: "login" | "signup"
   showAllProviders?: boolean
 }
 
-export function SocialLogin({ mode='login', showAllProviders = false }: SocialLoginProps) {
+export function SocialLogin({ showAllProviders = false }: SocialLoginProps) {
+  const [error, setError] = useState<string | null>(null);
   const { execute, isExecuting } = useAction(OAuthServerAction, {
     onSuccess: ({ data }) => {
       if (data?.redirectUrl) {
          window.location.href = data.redirectUrl;
       }
     },
-    onError: (error) => {
-        console.error("OAuth Error:", error)
+    onError: ({ error }) => {
+      if (error?.serverError) {
+        setError(error.serverError);
+      } else {
+        setError("Failed to initialize OAuth");
+      }
     }
   })
 
   const handleSocialLogin = (provider: string) => {
+    setError(null);
     execute({ provider: provider as "google" | "github" | "microsoft" | "apple" | "facebook" })
   }
 
@@ -63,6 +71,13 @@ export function SocialLogin({ mode='login', showAllProviders = false }: SocialLo
   return (
     <>
       <FieldSeparator className="my-6">OR</FieldSeparator>
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 mb-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
 
       <div className={`grid gap-3 w-full ${showAllProviders ? 'grid-cols-2' : 'grid-cols-2'}`}>
         {buttons.map((button) => (
@@ -75,6 +90,7 @@ export function SocialLogin({ mode='login', showAllProviders = false }: SocialLo
             className="h-11 gap-3 hover:bg-primary/5 dark:hover:bg-primary/10 hover:border-primary/20 transition-all"
           >
             <div className="grid place-items-center rounded-full bg-white dark:bg-white size-7 p-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={button.src} alt={button.label} width={20} height={20} />
             </div>
             <span className="text-xs font-medium">

@@ -1,9 +1,26 @@
 import { getCurrentUser } from '@/actions/auth.actions';
+import { createAdminSession } from '@/server/clients';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, Users, Activity, Database, Shield } from 'lucide-react';
 
+async function getStats() {
+  try {
+    const { users } = await createAdminSession();
+    const userList = await users.list();
+    return {
+      totalUsers: userList.total,
+    };
+  } catch (error) {
+    console.error("Failed to fetch stats:", error);
+    return {
+      totalUsers: 0,
+    };
+  }
+}
+
 export default async function AdminDashboard() {
   const { user } = await getCurrentUser();
+  const stats = await getStats();
 
   return (
     <div className="space-y-6">
@@ -26,9 +43,9 @@ export default async function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">-</div>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              Coming soon
+              Registered accounts
             </p>
           </CardContent>
         </Card>
