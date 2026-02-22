@@ -14,15 +14,16 @@ import { Password } from "@/components/ui/password"
 import { SocialLogin } from "./SocialLogin"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useState } from "react"
+import { AlertCircle } from "lucide-react"
 
 type Schema = z.infer<typeof LoginformSchema>;
 
 export function LoginForm() {
-
+const [globalError, setGlobalError] = useState<string | null>(null);
 const router = useRouter();
 const form = useForm<Schema>({
-  resolver: zodResolver(LoginformSchema as any),
+  resolver: zodResolver(LoginformSchema),
   defaultValues: {
     email: "",
     password: ""
@@ -41,11 +42,16 @@ const formAction = useAction(LoginserverAction, {
       }
     }, 1500);
   },
-  onError: () => {
-  // TODO: show error message
+  onError: ({ error }) => {
+    if (error?.serverError) {
+      setGlobalError(error.serverError);
+    } else {
+      setGlobalError("An unexpected error occurred. Please try again.");
+    }
   },
 });
 const handleSubmit = form.handleSubmit(async (data: Schema) => {
+    setGlobalError(null);
     formAction.execute(data);
   });
 
@@ -75,7 +81,7 @@ const { isExecuting, hasSucceeded } = formAction;
             Welcome Back!
           </h2>
           <p className="text-center text-base text-muted-foreground">
-            You've successfully logged in to your account
+            You&apos;ve successfully logged in to your account
           </p>
           <p className="text-center text-base text-primary mt-3">
             Redirecting to dashboard...
@@ -131,6 +137,13 @@ return (
             </Field>
         )} />
 
+        {globalError && (
+          <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <p>{globalError}</p>
+          </div>
+        )}
+
 <SocialLogin mode="login" />
           </FieldGroup>
           
@@ -139,7 +152,7 @@ return (
           </Button>
 
           <p className="text-center text-sm text-muted-foreground mt-4">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-primary hover:underline font-medium">
               Sign up
             </Link>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,12 @@ export default function OAuthFailurePage() {
     oauth_failed: 'OAuth authentication failed. Please try again.',
     oauth_missing_params: 'Missing authentication parameters.',
     oauth_callback_failed: 'Failed to complete authentication.',
+    oauth_unauthorized: 'Unauthorized: Invalid credentials or account.',
+    oauth_user_not_found: 'User account not found.',
+    oauth_network_error: 'Network error. Please check your connection.',
+    oauth_cookie_failed: 'Failed to set session cookies. Please enable cookies.',
+    oauth_invalid_session: 'Invalid session. Please try again.',
+    oauth_user_mismatch: 'User identity mismatch. Please try again.',
     access_denied: 'You denied access to your account.',
     unknown_error: 'An unknown error occurred during authentication.',
   };
