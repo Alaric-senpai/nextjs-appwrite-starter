@@ -127,11 +127,11 @@ export const Logout = async () => {
     };
   } catch (error: any) {
     console.error("Logout Error:", error);
-    
+
     // Even if Appwrite session deletion fails, clear local cookies
     await deleteSessionCookie();
     await deleteRoleCookie();
-    
+
     return {
       success: false,
       message: error?.message || "Failed to logout",
@@ -228,12 +228,14 @@ export const handleOauthCallback = async (secret: string, userId: string) => {
     if (session) {
       await setSessionCookie(session.secret);
 
+      let role: UserRole | undefined;
+
       // Check if user record exists in database
       try {
         const userDocs = await tables.listRows({
           databaseId: appwritecfg.databaseId,
           tableId: appwritecfg.tables.users,
-          queries: [Query.equal("userid", userId)]
+          queries: [Query.equal("userId", userId)]
         });
 
         // If user record doesn't exist, create one
@@ -241,13 +243,21 @@ export const handleOauthCallback = async (secret: string, userId: string) => {
           // Get user details from the session's userId
           const userAccount = await accounts.get();
           await createUserRecord(userId, userAccount.email, userAccount.name);
+          role = "client";
+        } else {
+          // Reuse the role from the existing user record
+          role = userDocs.rows[0].role as UserRole || "client";
         }
       } catch (dbError: any) {
         console.error("Database check/creation error:", dbError);
-        // Continue with auth even if DB operation fails
+        // Role will be fetched via fallback below
       }
 
-      const role = await getUserRole(session.userId);
+      // Final fallback to ensure we have a role
+      if (!role) {
+        role = await getUserRole(userId);
+      }
+
       await setRoleCookie(role as UserRole);
 
       return {
@@ -323,7 +333,7 @@ export const getCurrentUser = async () => {
  */
 export const userMatchesRole = async (role: UserRole) => {
   const savedRole = await getRoleCookie();
-  
+
   if (savedRole) {
     return savedRole as UserRole === role;
   }
@@ -337,7 +347,7 @@ export const userMatchesRole = async (role: UserRole) => {
 export const validateSession = async (): Promise<boolean> => {
   try {
     const sessionSecret = await getUserSessionCookie();
-    
+
     if (!sessionSecret) {
       return false;
     }
@@ -345,21 +355,21 @@ export const validateSession = async (): Promise<boolean> => {
     // Try to get user with current session
     const { accounts } = await createClientSession();
     const user = await accounts.get();
-    
+
     if (user && user.$id) {
       return true;
     }
-    
+
     return false;
   } catch (error: any) {
     console.error("Session Validation Error:", error);
-    
+
     // If session is invalid, clear cookies
     if (error?.code === 401 || error?.type === 'user_unauthorized') {
       await deleteSessionCookie();
       await deleteRoleCookie();
     }
-    
+
     return false;
   }
 };
@@ -371,12 +381,12 @@ export const getSessionExpiry = async () => {
   try {
     const { accounts } = await createClientSession();
     const session = await accounts.getSession('current');
-    
+
     if (session) {
       const expireDate = new Date(session.expire);
       const now = new Date();
       const timeRemaining = expireDate.getTime() - now.getTime();
-      
+
       return {
         success: true,
         expire: session.expire,
@@ -384,7 +394,7 @@ export const getSessionExpiry = async () => {
         isExpired: timeRemaining <= 0
       };
     }
-    
+
     return {
       success: false,
       message: "No active session found"
@@ -404,10 +414,10 @@ export const getSessionExpiry = async () => {
 export const extendSession = async () => {
   try {
     const { accounts } = await createClientSession();
-    
+
     // Get current session
     const currentSession = await accounts.getSession('current');
-    
+
     if (!currentSession) {
       return {
         success: false,
@@ -419,11 +429,11 @@ export const extendSession = async () => {
     const updatedSession = await accounts.updateSession({
       sessionId: 'current'
     });
-    
+
     if (updatedSession) {
       // Update session cookie with new secret if it changed
       await setSessionCookie(updatedSession.secret);
-      
+
       return {
         success: true,
         message: "Session extended successfully",
@@ -432,7 +442,7 @@ export const extendSession = async () => {
         }
       };
     }
-    
+
     return {
       success: false,
       message: "Failed to extend session"
@@ -453,7 +463,7 @@ export const listActiveSessions = async () => {
   try {
     const { accounts } = await createClientSession();
     const sessions = await accounts.listSessions();
-    
+
     return {
       success: true,
       sessions: sessions.sessions,
@@ -476,17 +486,17 @@ export const listActiveSessions = async () => {
 export const deleteSessionById = async (sessionId: string) => {
   try {
     const { accounts } = await createClientSession();
-    
+
     await accounts.deleteSession({
       sessionId
     });
-    
+
     // If deleting current session, clear cookies
     if (sessionId === 'current') {
       await deleteSessionCookie();
       await deleteRoleCookie();
     }
-    
+
     return {
       success: true,
       message: "Session deleted successfully"
@@ -507,7 +517,7 @@ export const getLinkedIdentities = async () => {
   try {
     const { accounts } = await createClientSession();
     const identities = await accounts.listIdentities();
-    
+
     return {
       success: true,
       identities: identities.identities,
@@ -530,11 +540,11 @@ export const getLinkedIdentities = async () => {
 export const unlinkIdentity = async (identityId: string) => {
   try {
     const { accounts } = await createClientSession();
-    
+
     await accounts.deleteIdentity({
       identityId
     });
-    
+
     return {
       success: true,
       message: "Identity unlinked successfully"
