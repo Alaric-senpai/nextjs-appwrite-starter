@@ -37,9 +37,9 @@ export function LoginForm() {
 
   const { execute, isExecuting } = useAction(LoginserverAction, {
     onSuccess: ({ data }) => {
-      if (data?.success) {
+      if (data?.success && data.data) {
         reset();
-        const role = data.data?.role;
+        const role = data.data.role;
         // Redirect logic based on role
         if (role === 'admin') {
           router.push('/admin');

@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LayoutDashboard, Shield, Link2, Activity } from 'lucide-react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 async function getClientStats() {
   try {
     const { accounts } = await createClientSession();

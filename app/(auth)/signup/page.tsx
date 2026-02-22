@@ -1,4 +1,4 @@
-import { SignupForm } from '@/components/forms/RegisterForm'
+import { RegisterForm } from '@/components/forms/RegisterForm'
 import { Metadata } from 'next'
 import React from 'react'
 
@@ -18,7 +18,7 @@ export const metadata:Metadata = {
 const SignupScreen = () => {
   return (
     <div className='w-full min-w-md h-full flex items-center justify-center flex-col gap-4'>
-        <SignupForm />
+        <RegisterForm />
     </div>
   )
 }

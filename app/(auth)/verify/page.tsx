@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function VerifySessionPage() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
@@ -39,5 +39,13 @@ export default function VerifySessionPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function VerifySessionPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="w-16 h-16 animate-spin text-primary" /></div>}>
+      <VerifyContent />
+    </Suspense>
   );
 }
