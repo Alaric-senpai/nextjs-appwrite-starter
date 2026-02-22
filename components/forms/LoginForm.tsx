@@ -29,20 +29,28 @@ const form = useForm<Schema>({
   }
 })
 const formAction = useAction(LoginserverAction, {
-  onSuccess: (data) => {
-    form.reset();
-    // Redirect to respective dashboard based on role
-    const role = data?.data?.role;
-    setTimeout(() => {
-      if (role === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard');
-      }
-    }, 1500);
+  onSuccess: ({ data }) => {
+    if (data?.success) {
+      form.reset();
+      // Redirect to respective dashboard based on role
+      const role = data.data?.role;
+      setTimeout(() => {
+        if (role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
+      }, 1500);
+    } else {
+      form.setError("root", {
+        message: data?.message || "Login failed"
+      });
+    }
   },
-  onError: () => {
-  // TODO: show error message
+  onError: ({ error }) => {
+    form.setError("root", {
+      message: error.serverError || "An unexpected error occurred"
+    });
   },
 });
 const handleSubmit = form.handleSubmit(async (data: Schema) => {
@@ -90,6 +98,10 @@ return (
             <h1 className="font-bold text-3xl tracking-tight">Welcome Back</h1>
             <p className="text-muted-foreground text-sm">Sign in to your account to continue</p>
           </div>
+
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} className="text-center" />
+          )}
 
         <Controller
           name="email"
