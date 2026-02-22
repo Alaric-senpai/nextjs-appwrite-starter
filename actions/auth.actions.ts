@@ -1,6 +1,6 @@
 "use server";
 import { actionClient } from "./safe-action";
-import { RegisterformSchema, LoginformSchema } from "../lib/form-schema";
+import { RegisterformSchema, LoginformSchema, ForgotPasswordSchema, ResetPasswordSchema } from "../lib/form-schema";
 import { createAdminSession, createClientSession } from "@/server/clients";
 import { ID, Query, Client, Account, OAuthProvider } from "node-appwrite";
 import { appwritecfg } from "@/config/appwrite.config";
@@ -84,7 +84,6 @@ export const OAuthServerAction = actionClient
     const origin = (await headers()).get("origin");
 
     try {
-      // Construct Appwrite OAuth2 URL manually to control redirect flow
       const target = new URL(`${appwritecfg.project.endpoint}/account/sessions/oauth2/${provider}`);
       target.searchParams.set("project", appwritecfg.project.id);
       target.searchParams.set("success", `${origin}/oauth`);
@@ -100,7 +99,58 @@ export const OAuthServerAction = actionClient
     }
   });
 
+export const ForgotPasswordAction = actionClient
+  .inputSchema(ForgotPasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { email } = parsedInput;
+    const origin = (await headers()).get("origin");
 
+    try {
+      const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id);
+
+      const account = new Account(client);
+
+      // The url to redirect to after user clicks the link in email
+      // We will create this page: /reset-password
+      const url = `${origin}/reset-password`;
+
+      await account.createRecovery(email, url);
+
+      return {
+        success: true,
+        message: "Recovery email sent. Please check your inbox.",
+      };
+    } catch (error: any) {
+      console.error("Forgot Password Error:", error);
+      throw new Error(error?.message || "Failed to send recovery email");
+    }
+  });
+
+export const ResetPasswordAction = actionClient
+  .inputSchema(ResetPasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { userId, secret, password, "confirm-password": passwordAgain } = parsedInput;
+
+    try {
+      const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id);
+
+      const account = new Account(client);
+
+      await account.updateRecovery(userId, secret, password);
+
+      return {
+        success: true,
+        message: "Password reset successfully. You can now login.",
+      };
+    } catch (error: any) {
+      console.error("Reset Password Error:", error);
+      throw new Error(error?.message || "Failed to reset password");
+    }
+  });
 
 export const Logout = async () => {
   try {
