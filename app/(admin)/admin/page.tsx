@@ -3,6 +3,8 @@ import { createAdminSession } from '@/server/clients';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, Users, Activity, Database, Shield } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   try {
     const { users } = await createAdminSession();

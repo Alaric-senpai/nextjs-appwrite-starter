@@ -3,7 +3,7 @@ import { appwritecfg } from "@/config/appwrite.config";
 import { setSessionCookie, setRoleCookie } from "@/server/cookies";
 import { Client, Account, Query } from "node-appwrite";
 import { NextRequest, NextResponse } from "next/server";
-import { createUserRecord, getUserRole } from "@/actions/user.actions";
+import { createUserRecord } from "@/actions/user.actions";
 
 export async function GET(request: NextRequest) {
     const userId = request.nextUrl.searchParams.get("userId");
@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 4. Check/Create DB Record
+        // We use Admin Session here because we need to query and create user records in DB
         const { tables } = await createAdminSession();
         let role = "client";
 
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
 
             if (userDocs.total === 0) {
                 // User doesn't exist in DB -> Create Record
-                console.log("Creating new user record for OAuth user:", userId);
+                // console.log("Creating new user record for OAuth user:", userId);
                 await createUserRecord(
                     userId, 
                     user.email || '', 
@@ -89,7 +90,9 @@ export async function GET(request: NextRequest) {
         }
 
         // 6. Successful authentication - redirect to success page then dashboard
-        console.log("OAuth Success: User authenticated", { userId, role });
+        // console.log("OAuth Success: User authenticated", { userId, role });
+
+        // Redirect directly to dashboard or success page that redirects
         return NextResponse.redirect(`${request.nextUrl.origin}/success`);
 
     } catch (error: any) {

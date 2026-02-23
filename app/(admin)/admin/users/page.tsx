@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { createAdminSession } from '@/server/clients';
 
+export const dynamic = 'force-dynamic';
+
 async function getUsers() {
   try {
     const { users } = await createAdminSession();

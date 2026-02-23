@@ -1,6 +1,6 @@
 "use server";
 import { actionClient } from "./safe-action";
-import { RegisterformSchema, LoginformSchema } from "../lib/form-schema";
+import { RegisterformSchema, LoginformSchema, ForgotPasswordSchema, ResetPasswordSchema } from "../lib/form-schema";
 import { createAdminSession, createClientSession } from "@/server/clients";
 import { ID, Query, Client, Account, OAuthProvider } from "node-appwrite";
 import { appwritecfg } from "@/config/appwrite.config";
@@ -10,7 +10,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import * as z from "zod";
 import { UserRole } from "@/lib/utils";
-import { authConfig } from "@/config/app.config";
 
 export const RegisterserverAction = actionClient
   .inputSchema(RegisterformSchema)
@@ -33,10 +32,7 @@ export const RegisterserverAction = actionClient
       };
     } catch (error: any) {
       console.error("Registration Error:", error);
-      return {
-        success: false,
-        message: error?.message || "Failed to create account",
-      };
+      throw new Error(error?.message || "Failed to create account");
     }
   });
 
@@ -47,11 +43,13 @@ export const LoginserverAction = actionClient
     const { email, password } = parsedInput;
 
     try {
-      // 1. Use admin session to create email password session
-      const { accounts: account } = await createAdminSession();
+      const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id);
+        // NO API KEY here for login!
 
-      // 2. Create Session
-      const session = await account.createEmailPasswordSession({ email, password });
+      const account = new Account(client);
+      const session = await account.createEmailPasswordSession(email, password);
 
       // 3. Set Session Cookie with expiration
       await setSessionCookie(session.secret);
@@ -71,10 +69,7 @@ export const LoginserverAction = actionClient
       };
     } catch (error: any) {
       console.error("Login Error:", error);
-      return {
-        success: false,
-        message: error?.message || "Invalid credentials",
-      };
+      throw new Error(error?.message || "Invalid credentials");
     }
   });
 
@@ -89,7 +84,6 @@ export const OAuthServerAction = actionClient
     const origin = (await headers()).get("origin");
 
     try {
-      // Construct Appwrite OAuth2 URL manually to control redirect flow
       const target = new URL(`${appwritecfg.project.endpoint}/account/sessions/oauth2/${provider}`);
       target.searchParams.set("project", appwritecfg.project.id);
       target.searchParams.set("success", `${origin}/oauth`);
@@ -101,14 +95,62 @@ export const OAuthServerAction = actionClient
       };
     } catch (error: any) {
       console.error("OAuth Initialization Error:", error);
-      return {
-        success: false,
-        message: error?.message || "Failed to initialize OAuth",
-      };
+      throw new Error(error?.message || "Failed to initialize OAuth");
     }
   });
 
+export const ForgotPasswordAction = actionClient
+  .inputSchema(ForgotPasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { email } = parsedInput;
+    const origin = (await headers()).get("origin");
 
+    try {
+      const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id);
+
+      const account = new Account(client);
+
+      // The url to redirect to after user clicks the link in email
+      // We will create this page: /reset-password
+      const url = `${origin}/reset-password`;
+
+      await account.createRecovery(email, url);
+
+      return {
+        success: true,
+        message: "Recovery email sent. Please check your inbox.",
+      };
+    } catch (error: any) {
+      console.error("Forgot Password Error:", error);
+      throw new Error(error?.message || "Failed to send recovery email");
+    }
+  });
+
+export const ResetPasswordAction = actionClient
+  .inputSchema(ResetPasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { userId, secret, password, "confirm-password": passwordAgain } = parsedInput;
+
+    try {
+      const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id);
+
+      const account = new Account(client);
+
+      await account.updateRecovery(userId, secret, password);
+
+      return {
+        success: true,
+        message: "Password reset successfully. You can now login.",
+      };
+    } catch (error: any) {
+      console.error("Reset Password Error:", error);
+      throw new Error(error?.message || "Failed to reset password");
+    }
+  });
 
 export const Logout = async () => {
   try {
@@ -127,11 +169,11 @@ export const Logout = async () => {
     };
   } catch (error: any) {
     console.error("Logout Error:", error);
-    
+
     // Even if Appwrite session deletion fails, clear local cookies
     await deleteSessionCookie();
     await deleteRoleCookie();
-    
+
     return {
       success: false,
       message: error?.message || "Failed to logout",
@@ -139,137 +181,61 @@ export const Logout = async () => {
   }
 };
 
-/**
- * Initialize GitHub OAuth flow
- */
-export const handleGithubOauth = async () => {
-  try {
-    const { accounts } = await createAdminSession();
-    const origin = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-
-    const githubAuth = await accounts.createOAuth2Token({
-      provider: OAuthProvider.Github,
-      success: `${origin}/oauth`,
-      failure: `${origin}/fail?error=github_oauth_failed`,
-      scopes: ['user', 'user:email']
-    });
-
-    if (githubAuth) {
-      return {
-        success: true,
-        message: "GitHub OAuth initialized successfully",
-        callback: githubAuth
-      };
-    }
-
-    return {
-      success: false,
-      message: "Failed to initialize GitHub OAuth"
-    };
-  } catch (error: any) {
-    console.error("GitHub OAuth Error:", error);
-    return {
-      success: false,
-      message: error?.message || "Error initializing GitHub OAuth"
-    };
-  }
-};
-
-/**
- * Initialize Google OAuth flow
- */
-export const handleGoogleOauth = async () => {
-  try {
-    const { accounts } = await createAdminSession();
-    const origin = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-
-    const googleAuth = await accounts.createOAuth2Token({
-      provider: OAuthProvider.Google,
-      success: `${origin}/oauth`,
-      failure: `${origin}/fail?error=google_oauth_failed`,
-      scopes: ['profile', 'email']
-    });
-
-    if (googleAuth) {
-      return {
-        success: true,
-        message: "Google OAuth initialized successfully",
-        callback: googleAuth
-      };
-    }
-
-    return {
-      success: false,
-      message: "Failed to initialize Google OAuth"
-    };
-  } catch (error: any) {
-    console.error("Google OAuth Error:", error);
-    return {
-      success: false,
-      message: error?.message || "Error initializing Google OAuth"
-    };
-  }
-};
-
-
 
 /**
  * Handle OAuth callback - called from the OAuth route handler
  */
 export const handleOauthCallback = async (secret: string, userId: string) => {
   try {
-    const { accounts, tables } = await createAdminSession();
+    // 1. Verify session by creating a client with the secret
+    const client = new Client()
+        .setEndpoint(appwritecfg.project.endpoint)
+        .setProject(appwritecfg.project.id)
+        .setSession(secret);
 
-    const session = await accounts.createSession({
-      userId,
-      secret
-    });
+    const account = new Account(client);
+    const user = await account.get();
 
-    if (session) {
-      await setSessionCookie(session.secret);
+    if (user.$id !== userId) {
+        throw new Error("User ID mismatch");
+    }
 
-      // Check if user record exists in database
-      try {
+    // 2. Set Cookies
+    await setSessionCookie(secret);
+
+    // 3. Check/Create DB Record (using Admin Session)
+    const { tables, accounts } = await createAdminSession();
+
+    try {
         const userDocs = await tables.listRows({
           databaseId: appwritecfg.databaseId,
           tableId: appwritecfg.tables.users,
-          queries: [Query.equal("userid", userId)]
+          queries: [Query.equal("userId", userId)]
         });
 
         // If user record doesn't exist, create one
         if (!userDocs.rows || userDocs.rows.length === 0) {
-          // Get user details from the session's userId
-          const userAccount = await accounts.get();
-          await createUserRecord(userId, userAccount.email, userAccount.name);
+          await createUserRecord(userId, user.email || '', user.name || 'User');
         }
-      } catch (dbError: any) {
+    } catch (dbError: any) {
         console.error("Database check/creation error:", dbError);
-        // Continue with auth even if DB operation fails
-      }
-
-      const role = await getUserRole(session.userId);
-      await setRoleCookie(role as UserRole);
-
-      return {
-        success: true,
-        message: "OAuth process completed successfully",
-        data: {
-          userId: session.userId,
-          expire: session.expire
-        }
-      };
+        // Continue even if DB operation fails
     }
 
+    const role = await getUserRole(userId);
+    await setRoleCookie(role as UserRole);
+
     return {
-      success: false,
-      message: "Failed to complete OAuth process"
+      success: true,
+      message: "OAuth process completed successfully",
+      data: {
+        userId: userId,
+        role: role as UserRole
+      }
     };
   } catch (error: any) {
     console.error("OAuth Callback Error:", error);
-    return {
-      success: false,
-      message: error?.message || "Failed to complete auth process",
-    };
+    throw new Error(error?.message || "Failed to complete auth process");
   }
 };
 
@@ -309,139 +275,11 @@ export const getCurrentUser = async () => {
       user
     };
   } catch (error: any) {
-    console.error("Get Current User Error:", error);
+    // console.error("Get Current User Error:", error);
     return {
       success: false,
       message: error?.message || "Failed to get active user",
       user: null
-    };
-  }
-};
-
-/**
- * Check if user matches a specific role
- */
-export const userMatchesRole = async (role: UserRole) => {
-  const savedRole = await getRoleCookie();
-  
-  if (savedRole) {
-    return savedRole as UserRole === role;
-  }
-  return false;
-};
-
-/**
- * Validate and refresh session if needed
- * Returns true if session is valid or was refreshed successfully
- */
-export const validateSession = async (): Promise<boolean> => {
-  try {
-    const sessionSecret = await getUserSessionCookie();
-    
-    if (!sessionSecret) {
-      return false;
-    }
-
-    // Try to get user with current session
-    const { accounts } = await createClientSession();
-    const user = await accounts.get();
-    
-    if (user && user.$id) {
-      return true;
-    }
-    
-    return false;
-  } catch (error: any) {
-    console.error("Session Validation Error:", error);
-    
-    // If session is invalid, clear cookies
-    if (error?.code === 401 || error?.type === 'user_unauthorized') {
-      await deleteSessionCookie();
-      await deleteRoleCookie();
-    }
-    
-    return false;
-  }
-};
-
-/**
- * Check session expiry and return time remaining
- */
-export const getSessionExpiry = async () => {
-  try {
-    const { accounts } = await createClientSession();
-    const session = await accounts.getSession('current');
-    
-    if (session) {
-      const expireDate = new Date(session.expire);
-      const now = new Date();
-      const timeRemaining = expireDate.getTime() - now.getTime();
-      
-      return {
-        success: true,
-        expire: session.expire,
-        timeRemaining: Math.max(0, timeRemaining),
-        isExpired: timeRemaining <= 0
-      };
-    }
-    
-    return {
-      success: false,
-      message: "No active session found"
-    };
-  } catch (error: any) {
-    console.error("Get Session Expiry Error:", error);
-    return {
-      success: false,
-      message: error?.message || "Failed to get session expiry"
-    };
-  }
-};
-
-/**
- * Extend current session by updating it
- */
-export const extendSession = async () => {
-  try {
-    const { accounts } = await createClientSession();
-    
-    // Get current session
-    const currentSession = await accounts.getSession('current');
-    
-    if (!currentSession) {
-      return {
-        success: false,
-        message: "No active session to extend"
-      };
-    }
-
-    // Update session to extend its lifetime
-    const updatedSession = await accounts.updateSession({
-      sessionId: 'current'
-    });
-    
-    if (updatedSession) {
-      // Update session cookie with new secret if it changed
-      await setSessionCookie(updatedSession.secret);
-      
-      return {
-        success: true,
-        message: "Session extended successfully",
-        data: {
-          expire: updatedSession.expire
-        }
-      };
-    }
-    
-    return {
-      success: false,
-      message: "Failed to extend session"
-    };
-  } catch (error: any) {
-    console.error("Extend Session Error:", error);
-    return {
-      success: false,
-      message: error?.message || "Failed to extend session"
     };
   }
 };
@@ -453,7 +291,7 @@ export const listActiveSessions = async () => {
   try {
     const { accounts } = await createClientSession();
     const sessions = await accounts.listSessions();
-    
+
     return {
       success: true,
       sessions: sessions.sessions,
@@ -476,17 +314,17 @@ export const listActiveSessions = async () => {
 export const deleteSessionById = async (sessionId: string) => {
   try {
     const { accounts } = await createClientSession();
-    
+
     await accounts.deleteSession({
       sessionId
     });
-    
+
     // If deleting current session, clear cookies
     if (sessionId === 'current') {
       await deleteSessionCookie();
       await deleteRoleCookie();
     }
-    
+
     return {
       success: true,
       message: "Session deleted successfully"
@@ -507,7 +345,7 @@ export const getLinkedIdentities = async () => {
   try {
     const { accounts } = await createClientSession();
     const identities = await accounts.listIdentities();
-    
+
     return {
       success: true,
       identities: identities.identities,
@@ -530,11 +368,11 @@ export const getLinkedIdentities = async () => {
 export const unlinkIdentity = async (identityId: string) => {
   try {
     const { accounts } = await createClientSession();
-    
+
     await accounts.deleteIdentity({
       identityId
     });
-    
+
     return {
       success: true,
       message: "Identity unlinked successfully"
@@ -544,6 +382,118 @@ export const unlinkIdentity = async (identityId: string) => {
     return {
       success: false,
       message: error?.message || "Failed to unlink identity"
+    };
+  }
+};
+
+/**
+ * Validate and refresh session if needed
+ */
+export const validateSession = async (): Promise<boolean> => {
+  try {
+    const sessionSecret = await getUserSessionCookie();
+
+    if (!sessionSecret) {
+      return false;
+    }
+
+    // Try to get user with current session
+    const { accounts } = await createClientSession();
+    const user = await accounts.get();
+
+    if (user && user.$id) {
+      return true;
+    }
+
+    return false;
+  } catch (error: any) {
+    // If session is invalid, clear cookies
+    if (error?.code === 401 || error?.type === 'user_unauthorized') {
+      await deleteSessionCookie();
+      await deleteRoleCookie();
+    }
+
+    return false;
+  }
+};
+
+/**
+ * Check session expiry and return time remaining
+ */
+export const getSessionExpiry = async () => {
+  try {
+    const { accounts } = await createClientSession();
+    const session = await accounts.getSession('current');
+
+    if (session) {
+      const expireDate = new Date(session.expire);
+      const now = new Date();
+      const timeRemaining = expireDate.getTime() - now.getTime();
+
+      return {
+        success: true,
+        expire: session.expire,
+        timeRemaining: Math.max(0, timeRemaining),
+        isExpired: timeRemaining <= 0
+      };
+    }
+
+    return {
+      success: false,
+      message: "No active session found"
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Failed to get session expiry"
+    };
+  }
+};
+
+/**
+ * Extend current session by updating it
+ */
+export const extendSession = async () => {
+  try {
+    const { accounts } = await createClientSession();
+
+    // Get current session
+    const currentSession = await accounts.getSession('current');
+
+    if (!currentSession) {
+      return {
+        success: false,
+        message: "No active session to extend"
+      };
+    }
+
+    // Update session to extend its lifetime
+    const updatedSession = await accounts.updateSession({
+      sessionId: 'current'
+    });
+
+    if (updatedSession) {
+      // Update session cookie with new secret if it changed
+      await setSessionCookie(updatedSession.secret);
+
+      return {
+        success: true,
+        message: "Session extended successfully",
+        data: {
+          expire: updatedSession.expire
+        }
+      };
+    }
+
+    return {
+      success: false,
+      message: "Failed to extend session"
+    };
+  } catch (error: any) {
+    console.error("Extend Session Error:", error);
+    return {
+      success: false,
+      message: error?.message || "Failed to extend session"
     };
   }
 };

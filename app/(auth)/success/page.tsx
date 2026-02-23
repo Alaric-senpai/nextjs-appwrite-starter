@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
-export default function OAuthSuccessPage() {
+function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countdown, setCountdown] = useState(3);
@@ -40,5 +40,13 @@ export default function OAuthSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OAuthSuccessPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="w-16 h-16 animate-spin text-primary" /></div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }

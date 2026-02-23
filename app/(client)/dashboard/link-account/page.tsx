@@ -27,9 +27,7 @@ export default function LinkAccountPage() {
       if (result && 'data' in result && result.data?.success && 'data' in result.data && result.data.data?.redirectUrl) {
         window.location.href = result.data.data.redirectUrl;
       } else {
-        const errorMessage = result && 'data' in result && result.data?.message 
-          ? result.data.message 
-          : 'Failed to initialize OAuth';
+        const errorMessage = 'Failed to initialize OAuth';
         alert(errorMessage);
         setLoading(null);
       }

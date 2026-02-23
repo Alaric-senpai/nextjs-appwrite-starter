@@ -4,8 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function OAuthFailurePage() {
+function FailureContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error') || 'unknown_error';
@@ -47,5 +48,13 @@ export default function OAuthFailurePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OAuthFailurePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <FailureContent />
+    </Suspense>
   );
 }
