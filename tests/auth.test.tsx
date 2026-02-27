@@ -8,6 +8,7 @@ vi.mock('@/actions/auth.actions', () => ({
   LoginserverAction: vi.fn(),
   RegisterserverAction: vi.fn(),
   OAuthServerAction: vi.fn(),
+  ForgotPasswordAction: vi.fn(),
 }));
 
 describe('Auth Forms', () => {
