@@ -22,7 +22,12 @@ export function Password(props: React.ComponentProps<typeof InputGroupInput>) {
         {...props}
       />
       <InputGroupAddon align="inline-end">
-        <InputGroupButton onClick={toggleVisibility}>
+        <InputGroupButton
+          onClick={toggleVisibility}
+          aria-label={isVisible ? "Hide password" : "Show password"}
+          aria-pressed={isVisible}
+          title={isVisible ? "Hide password" : "Show password"}
+        >
           {isVisible ? (
             <EyeOffIcon size={16} aria-hidden="true" />
           ) : (
