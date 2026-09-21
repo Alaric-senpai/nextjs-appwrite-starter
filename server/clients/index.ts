@@ -1,7 +1,7 @@
 'use server'
 
 import { appwritecfg } from "@/config/appwrite.config";
-import { Account, Avatars, Client, Databases, Functions, Health, Messaging, Sites, Storage, TablesDB, Teams, Tokens, Users } from "node-appwrite"
+import { Account, Avatars, Client, Databases, Functions, Messaging, Sites, Storage, TablesDB, Teams, Tokens, Users } from "node-appwrite"
 import { getUserSessionCookie } from "../cookies";
 
 interface AppwriteSession {
@@ -12,7 +12,6 @@ interface AppwriteSession {
     databases:Databases;
     tables:TablesDB;
     storage: Storage;
-    health:Health;
     avatars:Avatars;
     messaging:Messaging;
     sites:Sites;
@@ -57,12 +56,6 @@ export const createAdminSession = async():Promise<AppwriteSession>=>{
          */
         get sites(){
             return new Sites(cli)
-        },
-        /**
-         * appwrite projects health management
-         */
-        get health(){
-            return new Health(cli)
         },
         /**
          * messaging functionality
@@ -161,12 +154,6 @@ export const createClientSession = async():Promise<AppwriteSession>=>{
          */
         get sites(){
             return new Sites(cli)
-        },
-        /**
-         * appwrite projects health management
-         */
-        get health(){
-            return new Health(cli)
         },
         /**
          * messaging functionality

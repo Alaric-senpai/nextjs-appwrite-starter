@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 // const JetBrainsMo
 
 export const metadata: Metadata = {
-  title: "Nextjs Appwrite starter",
-  description: "appwrite next js starte with functional auth",
+  title: "Next Appwrite Starter | Ship with confidence",
+  description: "A production-minded Next.js and Appwrite starter with authentication, protected workspaces, and role-aware access.",
   authors: [{
     name: "Alaric senpai",
     url: "https://devcharles.me"
