@@ -1,327 +1,78 @@
-import { LandingNavbar } from "@/components/layout/landing-navbar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowRight, 
-  Shield, 
-  Lock, 
-  Mail, 
-  Github, 
-  Chrome,
-  LayoutDashboard,
-  User,
-  Zap,
-  Database,
-  CheckCircle2,
-  Crown,
-  Terminal as TerminalIcon,
-  Code2,
-  Settings,
-  Repeat,
-  Sparkles
-} from "lucide-react";
 import Link from "next/link";
-import { CodeBlock } from "@/components/ui/code-block";
-import { Terminal, AnimatedSpan } from "@/components/ui/terminal";
-import { Spotlight } from "@/components/ui/spotlight-new";
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  Github,
+  LayoutDashboard,
+  LockKeyhole,
+  Database,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { LandingNavbar } from "@/components/layout/landing-navbar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const features = [
+  { icon: ShieldCheck, title: "Auth that is ready", text: "Email/password, OAuth callbacks, sessions, verification, and recovery are already wired." },
+  { icon: LayoutDashboard, title: "A clear product shell", text: "Responsive client and admin spaces give your product a reliable place to grow." },
+  { icon: Database, title: "Appwrite at the core", text: "Use Appwrite for users, databases, storage, and server-side operations without glue code." },
+  { icon: LockKeyhole, title: "Secure by default", text: "Protected routes, role checks, validated actions, and session management keep access intentional." },
+];
+
+const steps = ["Clone the starter", "Add your Appwrite environment", "Ship your product"];
 
 export default function Home() {
-  const features = [
-    {
-      icon: Shield,
-      title: "Authentication",
-      description: "Complete auth system with email/password, magic links, and OAuth providers",
-      items: ["Email/Password", "Magic Links", "Session Management"]
-    },
-    {
-      icon: Chrome,
-      title: "OAuth Providers",
-      description: "Seamless integration with popular OAuth providers",
-      items: ["GitHub OAuth", "Google OAuth", "Extensible Provider System"]
-    },
-    {
-      icon: Lock,
-      title: "Security",
-      description: "Enterprise-grade security with route protection and proxy",
-      items: ["Route Guards", "Session Validation", "CSRF Protection"]
-    },
-    {
-      icon: LayoutDashboard,
-      title: "Dashboard UI",
-      description: "Beautiful, responsive dashboard with modern components",
-      items: ["Responsive Design", "Dark Mode Support", "Component Library"]
-    },
-    {
-      icon: User,
-      title: "Account Management",
-      description: "Complete user account operations and profile management",
-      items: ["Profile Updates", "Password Changes", "Account Deletion"]
-    },
-    {
-      icon: Database,
-      title: "Appwrite Integration",
-      description: "Full-featured Appwrite backend integration",
-      items: ["Database Operations", "File Storage", "Real-time Updates"]
-    },
-    {
-      icon: Zap,
-      title: "Dev Experience",
-      description: "Modern stack with best practices and tooling",
-      items: ["TypeScript", "Tailwind CSS", "React Hook Form"]
-    },
-    {
-      icon: Crown,
-      title: "Access Control",
-      description: "Supports role based dashboards for admin and client",
-      items: ['Admin Dashboard', "Client Dashboard"]
-    }
-  ];
-
-  const techStack = [
-    "Next.js",
-    "Appwrite",
-    "TypeScript",
-    "Tailwind CSS",
-    "motion",
-    "shadcn",
-    "Zod",
-    "React Hook Form",
-    "Lucide",
-    "Tanstack Query"
-  ];
-
   return (
-    <>
-      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
-        <LandingNavbar />
+    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+      <LandingNavbar />
 
-        {/* Hero Section */}
-        <section className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-32">
-          {/* Spotlight Effect */}
-          <div className="absolute inset-0 -z-10 w-full h-full">
-            <Spotlight />
-          </div>
-
-          {/* Grid Pattern */}
-          <div className="absolute inset-0 -z-20 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-          
-          <div className="container px-4 mx-auto relative z-10 text-center">
-            
-            <div className="inline-flex items-center rounded-full border border-border/40 bg-background/50 backdrop-blur-sm px-3 py-1 text-sm font-medium text-muted-foreground mb-8">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse" />
-              Production Ready Starter v2.0
-            </div>
-
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent max-w-4xl mx-auto">
-              Build your next idea with <br className="hidden md:block" />
-              <span className="text-primary">Next.js & Appwrite</span>
+      <section className="relative border-b border-border/60">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,color-mix(in_oklab,var(--primary)_18%,transparent),transparent_34%),linear-gradient(135deg,transparent_35%,color-mix(in_oklab,var(--accent)_35%,transparent))]" />
+        <div className="relative mx-auto grid max-w-7xl gap-16 px-6 pb-24 pt-20 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:px-8 lg:pb-32 lg:pt-28">
+          <div className="max-w-2xl">
+            <Badge variant="outline" className="mb-7 gap-2 rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-primary">
+              <span className="size-1.5 rounded-full bg-primary" /> Next.js + Appwrite, refined
+            </Badge>
+            <h1 className="text-balance text-5xl font-semibold tracking-[-0.06em] sm:text-6xl lg:text-7xl">
+              Your product deserves a <span className="text-primary">stronger start.</span>
             </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              A minimalistic, performance-first starter template packed with authentication, 
-              role-based authorization, and a beautiful dashboard.
+            <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-muted-foreground">
+              Skip the setup maze. Start with a production-minded Next.js foundation that includes Appwrite auth, protected workspaces, role-aware access, and a polished UI system.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="rounded-full px-8 h-12 text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
-                <Link href="/auth/login">
-                  Start Building
-                  <ArrowRight className="ml-2 size-4" />
-                </Link>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 rounded-md px-6 shadow-[0_0_36px_color-mix(in_oklab,var(--primary)_30%,transparent)]">
+                <Link href="/signup">Start building <ArrowRight data-icon="inline-end" /></Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-8 h-12 text-base bg-background/50 backdrop-blur-sm hover:bg-muted/50">
-                <Link href="https://github.com/Alaric-senpai/nextjs-appwrite-starter" target="_blank">
-                  <Github className="mr-2 size-4" />
-                  Star on GitHub
-                </Link>
+              <Button asChild variant="outline" size="lg" className="h-12 rounded-md border-border/80 bg-card/40 px-6">
+                <Link href="https://github.com/Alaric-senpai/nextjs-appwrite-starter" target="_blank" rel="noreferrer"><Github data-icon="inline-start" /> View source</Link>
               </Button>
             </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 mt-12 text-sm text-muted-foreground/80">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-primary" />
-                <span>Type-Safe</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-primary" />
-                <span>Auth Ready</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-primary" />
-                <span>Modern Stack</span>
-              </div>
+            <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">
+              {["Type-safe", "Appwrite-powered", "Dark-mode ready"].map((item) => <span key={item} className="flex items-center gap-2"><Check className="size-4 text-primary" />{item}</span>)}
             </div>
           </div>
-        </section>
 
-        {/* Tech Stack */}
-        <section className="border-y border-border/40 bg-muted/20">
-          <div className="container mx-auto px-4 py-12">
-            <p className="text-center text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-              Powered by modern technologies
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {techStack.map((tech) => (
-                <Badge 
-                  key={tech} 
-                  variant="outline" 
-                  className="px-4 py-1.5 text-sm font-normal bg-background/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-colors"
-                >
-                  {tech}
-                </Badge>
-              ))}
+          <div className="relative mx-auto w-full max-w-xl rounded-2xl border border-white/10 bg-[#080b21] p-3 shadow-2xl shadow-primary/20 lg:rotate-2">
+            <div className="rounded-xl border border-white/10 bg-[#0d112d] p-4 sm:p-6">
+              <div className="mb-7 flex items-center justify-between"><div><p className="text-xs text-slate-400">Workspace / Overview</p><p className="mt-2 text-lg font-medium text-white">Good morning, builder</p></div><div className="size-9 rounded-full bg-primary/25 ring-4 ring-primary/10" /></div>
+              <div className="grid grid-cols-3 gap-3">{[["32", "Open tasks"], ["67%", "Goal reached"], ["18", "Courses"]].map(([value, label]) => <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-3"><p className="text-xl font-medium text-white">{value}</p><p className="mt-1 text-[10px] text-slate-500">{label}</p></div>)}</div>
+              <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.03] p-4"><div className="flex items-center justify-between"><p className="text-sm font-medium text-white">Product progress</p><BarChart3 className="size-4 text-primary" /></div><div className="mt-5 h-2 rounded-full bg-white/10"><div className="h-full w-2/3 rounded-full bg-primary" /></div><div className="mt-3 flex justify-between text-[10px] text-slate-500"><span>Keep shipping</span><span>67%</span></div></div>
+              <div className="mt-4 grid grid-cols-2 gap-3">{["Account security", "Team workspace"].map((label) => <div key={label} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-slate-300"><span className="flex size-6 items-center justify-center rounded bg-primary/20"><Check className="size-3 text-primary" /></span>{label}</div>)}</div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Grid */}
-        <section className="container mx-auto px-4 py-24">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight mb-4">
-                Everything You Need
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                A comprehensive suite of features to jumpstart your next project.
-              </p>
-            </div>
+      <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
+        <div className="max-w-2xl"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">The foundation</p><h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Less scaffolding. More shipping.</h2><p className="mt-4 text-muted-foreground">The repetitive parts are organized, tested, and ready to extend so your first meaningful feature arrives sooner.</p></div>
+        <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{features.map(({ icon: Icon, title, text }) => <article key={title} className="rounded-xl border border-border/70 bg-card/40 p-6 transition-colors hover:border-primary/50"><div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><Icon className="size-5" /></div><h3 className="mt-5 font-medium">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{text}</p></article>)}</div>
+      </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {features.map((feature) => {
-                const Icon = feature.icon;
-                return (
-                  <div 
-                    key={feature.title}
-                    className="group p-6 rounded-2xl border border-border/40 bg-card/30 hover:bg-card/50 transition-all hover:border-border/80"
-                  >
-                    <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Icon className="size-6" />
-                    </div>
-                    
-                    <h3 className="text-lg font-semibold mb-2">
-                      {feature.title}
-                    </h3>
-                    
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Developer Experience */}
-        <section className="container mx-auto px-4 py-24 bg-secondary/5">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <Badge variant="outline" className="mb-4 bg-background">
-                <Code2 className="size-3 mr-2" />
-                Developer Experience
-              </Badge>
-              <h2 className="text-3xl font-bold tracking-tight mb-4">
-                Built for Speed & Reliability
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                We've handled the boring stuff so you can focus on building your product.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Config Card */}
-              <div className="bg-background border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
-                <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
-                  <Settings className="size-5 text-blue-500" />
-                </div>
-                <h3 className="font-semibold mb-2">Type-Safe Config</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Centralized environment configuration with validation and TypeScript support.
-                </p>
-                <div className="bg-muted/30 rounded-lg p-3 text-xs font-mono text-muted-foreground">
-                  appwrite.config.ts
-                </div>
-              </div>
-
-              {/* Server Actions Card */}
-              <div className="bg-background border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
-                <div className="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-4">
-                  <Zap className="size-5 text-purple-500" />
-                </div>
-                <h3 className="font-semibold mb-2">Safe Server Actions</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Validated server actions with `next-safe-action` for type-safe backend logic.
-                </p>
-                <div className="bg-muted/30 rounded-lg p-3 text-xs font-mono text-muted-foreground">
-                  actions/safe-action.ts
-                </div>
-              </div>
-
-              {/* Appwrite Clients Card */}
-              <div className="bg-background border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
-                <div className="size-10 rounded-lg bg-green-500/10 flex items-center justify-center mb-4">
-                  <Database className="size-5 text-green-500" />
-                </div>
-                <h3 className="font-semibold mb-2">Appwrite Clients</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Pre-configured Admin and Session clients with automatic cookie handling.
-                </p>
-                <div className="bg-muted/30 rounded-lg p-3 text-xs font-mono text-muted-foreground">
-                  server/clients/index.ts
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="container mx-auto px-4 py-32">
-          <div className="max-w-5xl mx-auto text-center relative">
-            {/* Decorative gradient orbs */}
-            <div className="absolute inset-0 -z-10">
-              <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-              <div className="absolute top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
-            </div>
-            
-            <div className="bg-linear-to-br from-card/80 to-card/40 dark:from-card/50 dark:to-card/20 backdrop-blur-xl rounded-3xl p-16 border border-primary/20 shadow-2xl dark:shadow-primary/10">
-              <Badge variant="secondary" className="mb-6">
-                <Sparkles className="size-3 mr-2" />
-                Start Building Today
-              </Badge>
-              <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Ready to Start Building?
-              </h2>
-              <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
-                Get started with this production-ready template and build your next 
-                application with enterprise-grade authentication and security.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button asChild size="lg" className="rounded-full px-10 py-6 text-lg shadow-xl bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary dark:shadow-primary/30 hover:scale-105 transition-transform">
-                  <Link href="/auth/login">
-                    Get Started Now
-                    <ArrowRight className="ml-2 size-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-full px-10 py-6 text-lg border-2 hover:bg-secondary/80">
-                  <Link href="https://github.com" target="_blank">
-                    <Github className="mr-2 size-5" />
-                    View on GitHub
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="border-t mt-20 dark:border-border/50">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Built with <span className="text-primary">Next.js</span> and <span className="text-primary">Appwrite</span> • MIT License</p>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </>
+      <section className="border-y border-border/60 bg-card/30"><div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[0.7fr_1fr] lg:px-8"><div><Sparkles className="size-5 text-primary" /><h2 className="mt-5 text-2xl font-semibold tracking-tight">A calm path from idea to launch.</h2></div><div className="grid gap-4 sm:grid-cols-3">{steps.map((step, index) => <div key={step} className="border-l border-border pl-4"><p className="text-xs text-primary">0{index + 1}</p><p className="mt-2 text-sm font-medium">{step}</p></div>)}</div></div></section>
+      <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8"><span>Next Appwrite Starter</span><Link href="/login" className="transition-colors hover:text-foreground">Already have an account? Sign in</Link></footer>
+    </main>
   );
-}
+  }
+

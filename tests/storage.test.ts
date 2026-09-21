@@ -29,7 +29,7 @@ vi.mock('@/actions/safe-action', () => ({
   actionClient: {
     inputSchema: () => ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      action: (fn: any) => fn,
+      action: (fn: any) => (input: any) => fn({ parsedInput: input }),
     }),
   },
 }));
@@ -47,18 +47,18 @@ describe('Storage Actions', () => {
 
   it('deletes a file', async () => {
     // Manually calling the action function as mocked
-    const result = await deleteFile({ parsedInput: { fileId: 'file-123' } });
+    const result = await deleteFile({ fileId: 'file-123' });
     expect(result.success).toBe(true);
   });
 
   it('gets file view', async () => {
-    const result = await getFileView({ parsedInput: { fileId: 'file-123' } });
+    const result = await getFileView({ fileId: 'file-123' });
     expect(result.success).toBe(true);
     expect(result.base64).toBe(Buffer.from('view').toString('base64'));
   });
 
   it('gets file download', async () => {
-    const result = await getFileDownload({ parsedInput: { fileId: 'file-123' } });
+    const result = await getFileDownload({ fileId: 'file-123' });
     expect(result.success).toBe(true);
     expect(result.base64).toBe(Buffer.from('download').toString('base64'));
   });
